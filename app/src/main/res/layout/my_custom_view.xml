@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <TextView android:id="@+id/list_row_text"
+        android:layout_width="wrap_content"
+        android:layout_height="?android:attr/listPreferredItemHeight"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textSize="18dp"
+        android:layout_weight="9786.10">
+    </TextView>
+
+    <CheckBox
+        android:id="@+id/list_row_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:gravity="right"
+        android:layout_weight="1">
+    </CheckBox>
+
+</LinearLayout>
