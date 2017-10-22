@@ -1,7 +1,7 @@
 package com.example.nathanmorgenstern.contactlistapplication;
 
 import android.content.Context;
-import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -9,10 +9,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -31,7 +33,10 @@ public class ContactDetailsFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private static final String CONTACT_DETAILS = "CONTACT_DETAILS";
     private MySQLHelper sqlHelper;
-
+    private Button  addPersonButton;
+    private CheckBox chBox;
+    EditText name_input;
+    EditText phone_input;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -41,6 +46,7 @@ public class ContactDetailsFragment extends Fragment {
 
     public ContactDetailsFragment() {
         // Required empty public constructor
+        //setRetainInstance(true);
     }
 
     /**
@@ -86,17 +92,23 @@ public class ContactDetailsFragment extends Fragment {
 
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
-        sqlHelper = new MySQLHelper(getContext());
-        loadDataToListView();
 
-        Button addPersonButton = (Button)getActivity().findViewById(R.id.addPerson);
-        addPersonButton.setOnClickListener(new View.OnClickListener(){
+        addPersonButton = (Button)getActivity().findViewById(R.id.addPerson);
+        //check to see if the fragment is currently on the screen by checking if item is null
+        if(addPersonButton != null) {
+            sqlHelper = new MySQLHelper(getContext());
+            loadDataToListView();
+            addPersonActionListener();
+        }
+    }
+
+    public void addPersonActionListener(){
+        addPersonButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 mListener.onFragmentInteraction(null);
                 Log.v(CONTACT_DETAILS, "Add Button pressed");
-
-                EditText name_input = (EditText)getActivity().findViewById(R.id.nameInput);
-                EditText phone_input = (EditText)getActivity().findViewById(R.id.phoneNumberInput);
+                name_input = (EditText)  getActivity().findViewById(R.id.nameInput);
+                phone_input = (EditText) getActivity().findViewById(R.id.phoneNumber);
                 //get the strings from the edit text field
                 String nameStr = name_input.getText().toString();
                 String phoneStr = phone_input.getText().toString();
@@ -106,24 +118,55 @@ public class ContactDetailsFragment extends Fragment {
                 int id = sqlHelper.getContactsCount() + 1;
 
                 //Create the new contact and add them to the database using sqlHelper class
-                Contact newContact = new Contact(id,nameStr,phoneStr);
-                sqlHelper.addContact(newContact);
-                Log.v(CONTACT_DETAILS, "added contact with sqlHelper");
-                getActivity().finish();
+                if (!nameStr.equals("") && !phoneStr.equals("")) {
+                    Contact newContact = new Contact(id, nameStr, phoneStr);
+                    sqlHelper.addContact(newContact);
+                    Log.v(CONTACT_DETAILS, "added contact with sqlHelper");
+                    orientationAction();
+                }//check that the inputs are not empty
             }
         });
     }
 
-    public void loadDataToListView(){
-        ListView contactList = (ListView)getActivity().findViewById(R.id.relationshipListView);
+    public void orientationAction(){
+        if (this.getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_PORTRAIT)
+            getActivity().finish();
+
+        //ELSE, we are in landscape mode do associated actions...
+        ContactListFragment clf = (ContactListFragment)getFragmentManager().findFragmentById(R.id.landscape_contact_list_fragment);
+        if(clf != null)
+            clf.loadDataToListView();
+
+        //Clear the text of the buttons again after they are clicked by the user in landscape mode
+        name_input.setText("");
+        phone_input.setText("");
+        loadDataToListView();
+    }
+
+    public void loadDataToListView() {
+        final ListView contactList = (ListView) getActivity().findViewById(R.id.relationshipListView);
         ArrayList<String> itemList;
-
         itemList = sqlHelper.getAllContacts();
-
-        Log.v(CONTACT_DETAILS, "itemList.size: " + itemList.size());
 
         CustomAdapter custom_adapter = new CustomAdapter(getContext(), R.layout.my_custom_view, itemList);
         contactList.setAdapter(custom_adapter);
+
+        contactList.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> list,
+                                            View row,
+                                            int index,
+                                            long rowID) {
+                        // code to run when user clicks that item
+                        TextView name = (TextView)row.findViewById(R.id.list_row_text);
+
+                        Log.v(CONTACT_DETAILS, "int index: " + index);
+                        Log.v(CONTACT_DETAILS, "name: " + name.getText());
+                    }
+                });
+
     }
 
     @Override

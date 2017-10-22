@@ -8,7 +8,7 @@
     tools:context="com.example.nathanmorgenstern.contactlistapplication.ContactDetailsFragment">
 
     <TextView
-        android:id="@+id/nameDisplay"
+        android:id="@+id/contact_profile_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="29dp"
@@ -23,12 +23,12 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
-        android:layout_below="@+id/nameDisplay"
-        android:layout_alignStart="@+id/nameDisplay"
-        android:layout_alignEnd="@+id/phoneNumberInput" />
+        android:layout_below="@+id/contact_profile_name"
+        android:layout_alignStart="@+id/contact_profile_name"
+        android:layout_alignEnd="@+id/phoneNumber" />
 
     <EditText
-        android:id="@+id/phoneNumberInput"
+        android:id="@+id/phoneNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -45,22 +45,22 @@
         android:text="Phone Number:"
         android:textSize="18sp"
         android:layout_below="@+id/nameInput"
-        android:layout_alignStart="@+id/nameDisplay" />
+        android:layout_alignStart="@+id/contact_profile_name" />
 
     <TextView
-        android:id="@+id/relationshipDisplay"
+        android:id="@+id/relationshipDisplayProfile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignStart="@+id/phoneNumberDisplay"
-        android:layout_below="@+id/phoneNumberInput"
+        android:layout_below="@+id/phoneNumber"
         android:text="Relationship:"
         android:textSize="18sp" />
 
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/relationshipDisplay"
-        android:layout_alignStart="@+id/relationshipDisplay"
+        android:layout_below="@+id/relationshipDisplayProfile"
+        android:layout_alignStart="@+id/relationshipDisplayProfile"
         android:layout_alignEnd="@+id/addPerson"
         android:id="@+id/relationshipListView"
         android:layout_above="@+id/addPerson" />

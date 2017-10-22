@@ -2,6 +2,7 @@ package com.example.nathanmorgenstern.contactlistapplication;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -12,6 +13,7 @@ import com.example.nathanmorgenstern.contactlistapplication.Contact;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.id;
 import static android.R.attr.name;
 
 public class MySQLHelper extends SQLiteOpenHelper {
@@ -48,6 +50,7 @@ public class MySQLHelper extends SQLiteOpenHelper {
 
         // create contacts table
         db.execSQL(CREATE_CONTACT_LIST_TABLE);
+        db.close();
     }
 
     @Override
@@ -61,25 +64,45 @@ public class MySQLHelper extends SQLiteOpenHelper {
     public void addContact(Contact contact){
         // 1. get reference to writable DB
         SQLiteDatabase db = this.getWritableDatabase();
-
         // 2. create ContentValues to add key "column"/value
         ContentValues values = new ContentValues();
         //values.put(KEY_ID,contact.get_id()); //get the contact id
         values.put(KEY_NAME, contact.getName()); // get name
         values.put(KEY_NUMBER, contact.getNumber()); // get phone number
-
         //for logging
-        //Log.v(SQL_DEBUGGER, "Contact id: " + contact.get_id());
         Log.v(SQL_DEBUGGER, "Contact name: " + contact.getName());
         Log.v(SQL_DEBUGGER, "Contact phone: " + contact.getNumber());
-
         // 3. insert
         db.insert(TABLE_CONTACTS, // table
                 null, //nullColumnHack
                 values); // key/value -> keys = column names/ values = column values
-
         // 4. close
         db.close();
+    }
+
+    public void deleteContact(String name){
+        // 1. get reference to writable DB
+        SQLiteDatabase db = this.getWritableDatabase();
+        // 2. delete item from DB
+        db.delete(TABLE_CONTACTS,"name = ?", new String[] { name });
+        db.close();
+    }
+
+    public String getContactPhone(String name){
+        SQLiteDatabase db = this.getReadableDatabase();
+        //Cursor cursor = db.query(TABLE_CONTACTS,new String[]{KEY_NUMBER}, KEY_NAME + "=?", new String[] {name}, null, null,null);
+        String strQuery = "SELECT " + KEY_NUMBER + " FROM " + TABLE_CONTACTS + " WHERE name=?";
+        Cursor cursor = db.rawQuery(strQuery, new String[] {name},null);
+        Log.v(SQL_DEBUGGER, "Cursor initialized");
+        if (cursor != null)
+            cursor.moveToFirst();
+        String result = cursor.getString(0);
+
+        Log.v(SQL_DEBUGGER, "Contact phone: " + result);
+        db.close();
+        cursor.close();
+        // return contact list
+        return result;
     }
 
     // Getting contacts Count
@@ -109,6 +132,7 @@ public class MySQLHelper extends SQLiteOpenHelper {
                 contactList.add(cursor.getString(1));
             } while (cursor.moveToNext());
         }
+        db.close();
         // return contact list
         return contactList;
     }

@@ -1,19 +1,30 @@
 package com.example.nathanmorgenstern.contactlistapplication;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import static android.R.attr.fragment;
+import static android.R.attr.orientation;
 
 
 /**
@@ -31,6 +42,8 @@ public class ContactListFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private static final String CONTACT_LIST = "CONTACT_LIST_FRAGMENT";
     private MySQLHelper sqlHelper;
+    private CheckBox chBox;
+    private TextView text;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -85,13 +98,50 @@ public class ContactListFragment extends Fragment {
 
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
-
-        sqlHelper = new MySQLHelper(getContext());
         loadDataToListView();
 
-        Button addButton = (Button)getActivity().findViewById(R.id.add_button);
-        addButton.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View view){
+        if (this.getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_LANDSCAPE) {
+            landscapeMode();
+        }
+        else
+            portraitMode();
+
+        //Add the deleteButton action listener
+        Button deleteButton = (Button) getActivity().findViewById(R.id.delete_button);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                mListener.onFragmentInteraction(null);
+                Log.v(CONTACT_LIST, "Delete Button pressed");
+                getCheckedBoxes();
+                loadDataToListView();
+
+                ContactDetailsFragment cdf = (ContactDetailsFragment)getFragmentManager().findFragmentById(R.id.fragment_container);
+                if (getActivity().getResources().getConfiguration().orientation ==
+                        Configuration.ORIENTATION_LANDSCAPE && cdf != null)
+                        cdf.loadDataToListView();
+            }
+        });
+
+        ListView contactList = (ListView)getActivity().findViewById(R.id.contact_list_view);
+        contactList.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> list,
+                                            View row,
+                                            int index,
+                                            long rowID) {
+                        TextView name = (TextView) row.findViewById(R.id.list_row_text);
+
+                        orientationHandler(name.getText().toString());
+                    }
+                });
+    }
+
+    public void portraitMode(){
+        Button addButton = (Button) getActivity().findViewById(R.id.add_button);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
                 mListener.onFragmentInteraction(null);
                 Log.v(CONTACT_LIST, "Add Button pressed");
                 Intent i = new Intent(getActivity(), ContactDetailsActivity.class);
@@ -99,31 +149,114 @@ public class ContactListFragment extends Fragment {
                 startActivity(i);
             }
         });
+    }
 
-        Button deleteButton = (Button)getActivity().findViewById(R.id.delete_button);
-        deleteButton.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View view){
+    public void landscapeMode(){
+        Button addButton = (Button) getActivity().findViewById(R.id.add_button);
+
+        addButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
                 mListener.onFragmentInteraction(null);
-                Log.v(CONTACT_LIST, "Delete Button pressed");
+                Log.v(CONTACT_LIST, "Add Button pressed");
+                ContactDetailsFragment f = new ContactDetailsFragment();
+
+                FragmentManager fragmentManager = getActivity().getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.fragment_container, f);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+
+                TextView rightSide = (TextView)getActivity().findViewById(R.id.right_side_toolbar);
+                rightSide.setText("Contact Details");
             }
         });
+
+        Log.v(CONTACT_LIST, "I'm in landscape mode");
+
+    }
+    //Reference: https://developer.android.com/training/basics/fragments/fragment-ui.html
+
+    public void getCheckedBoxes(){
+        View v;
+        ListView contactList = (ListView) getActivity().findViewById(R.id.contact_list_view);
+        Log.v(CONTACT_LIST, "Contact list.getCount(): " + contactList.getCount());
+        for (int i = 0; i < contactList.getCount(); i++) {
+            v = contactList.getAdapter().getView(i, null, null);
+            //Getting the views by their index...
+            chBox = v.findViewById(R.id.list_row_box);
+            text  = v.findViewById(R.id.list_row_text);
+
+            if (chBox.isChecked()) {
+                Log.v(CONTACT_LIST, "Check box at index: " + i + " checked!");
+                sqlHelper.deleteContact(text.getText().toString());
+            }
+            else
+                Log.v(CONTACT_LIST, "Check box at index: " + i + " is not checked!");
+        }
+
+    }
+
+    public void loadDataToListView(){
+        ListView contactList = (ListView)getActivity().findViewById(R.id.contact_list_view);
+        sqlHelper = new MySQLHelper(getContext());
+        if(contactList != null) {
+            ArrayList<String> itemList;
+            itemList = sqlHelper.getAllContacts();
+            Log.v(CONTACT_LIST, "itemList.size: " + itemList.size());
+
+            CustomAdapter custom_adapter = new CustomAdapter(getContext(), R.layout.my_custom_view, itemList);
+            contactList.setAdapter(custom_adapter);
+
+            contactList.setOnItemClickListener(
+                    new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> list,
+                                                View row,
+                                                int index,
+                                                long rowID) {
+                            // code to run when user clicks that item
+                            TextView name = (TextView) row.findViewById(R.id.list_row_text);
+
+                            Log.v(CONTACT_LIST, "int index: " + index);
+                            Log.v(CONTACT_LIST, "name: " + name.getText());
+                            orientationHandler(name.getText().toString());
+                        }
+                    });
+        }
+    }
+
+    public void orientationHandler(String name){
+
+        if(this.getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_PORTRAIT) {
+            Intent i = new Intent(getActivity(), ContactProfileActivity.class);
+            i.putExtra("nameStr", name);
+            Log.v(CONTACT_LIST, "New intent starting...");
+            startActivity(i);
+        }
+
+        //Else,
+        else if(this.getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_LANDSCAPE) {
+            ContactProfileFragment cpf = new ContactProfileFragment();
+
+            FragmentManager fragmentManager = getActivity().getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container, cpf);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+
+
+            ContactProfileFragment contactProfile = (ContactProfileFragment)getFragmentManager().findFragmentById(R.id.fragment_container);
+            if(contactProfile != null)
+                contactProfile.addContactDetails(name);
+        }
     }
 
     @Override
     public void onResume(){
         super.onResume();
         loadDataToListView();
-    }
-
-    public void loadDataToListView(){
-        ListView contactList = (ListView)getActivity().findViewById(R.id.contact_list_view);
-
-        ArrayList<String> itemList;
-        itemList = sqlHelper.getAllContacts();
-        Log.v(CONTACT_LIST, "itemList.size: " + itemList.size());
-
-        CustomAdapter custom_adapter = new CustomAdapter(getContext(), R.layout.my_custom_view, itemList);
-        contactList.setAdapter(custom_adapter);
     }
 
     @Override

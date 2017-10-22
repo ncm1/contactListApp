@@ -30,5 +30,6 @@
         android:id="@+id/contact_list_view"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
+        android:clickable="true"
         android:layout_above="@+id/add_button" />
 </RelativeLayout>

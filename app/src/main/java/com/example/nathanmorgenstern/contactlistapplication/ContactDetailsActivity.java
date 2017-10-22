@@ -17,33 +17,15 @@ public class ContactDetailsActivity extends AppCompatActivity implements Contact
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact_details);
-        //updateRelationshipView();
     }
 
     public void onFragmentInteraction(Uri uri){
+        /*
+        //ContactDetailsFragment cdf = (ContactDetailsFragment)getFragmentManager().findFragmentById(R.id.contact_details_fragment);
+        ContactListFragment clf = (ContactListFragment)getFragmentManager().findFragmentById(R.id.contact_list_fragment);
+        if(clf != null)
+            clf.loadDataToListView();
+            */
     }
 
-    /*public void updateRelationshipView(){
-        ArrayList<String> itemList = new ArrayList<>();
-
-        itemList.add("Hello");
-        itemList.add("Hello");
-        itemList.add("Hello");
-        itemList.add("Hello");
-        itemList.add("Hello");
-        itemList.add("Hello");
-        itemList.add("Hello");
-        itemList.add("Hello");
-        itemList.add("Hello");
-        itemList.add("Hello");
-        itemList.add("Hello");
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-
-                R.layout.my_custom_view, itemList);
-
-        CustomAdapter custom_adapter = new CustomAdapter(this, R.layout.my_custom_view, itemList);
-        ListView contactList = (ListView)findViewById(R.id.relationshipListView);
-        contactList.setAdapter(custom_adapter);
-    }*/
 }

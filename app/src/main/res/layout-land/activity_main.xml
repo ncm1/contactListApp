@@ -8,7 +8,7 @@
     tools:layout_editor_absoluteX="0dp">
 
     <android.support.v7.widget.Toolbar
-        android:id="@+id/contact_details_toolbar"
+        android:id="@+id/contact_profile_toolbar"
         android:layout_width="233dp"
         android:layout_height="48dp"
         android:background="#000000"
@@ -29,10 +29,10 @@
         android:text="@string/contacts"
         android:textColor="#ffffff"
         android:textSize="20sp"
-        app:layout_constraintRight_toLeftOf="@+id/contact_details_toolbar"
-        app:layout_constraintLeft_toRightOf="@+id/contact_details_toolbar"
-        app:layout_constraintBottom_toTopOf="@+id/contact_details_toolbar"
-        app:layout_constraintTop_toBottomOf="@+id/contact_details_toolbar">
+        app:layout_constraintRight_toLeftOf="@+id/contact_profile_toolbar"
+        app:layout_constraintLeft_toRightOf="@+id/contact_profile_toolbar"
+        app:layout_constraintBottom_toTopOf="@+id/contact_profile_toolbar"
+        app:layout_constraintTop_toBottomOf="@+id/contact_profile_toolbar">
 
     </TextView>
 
@@ -43,39 +43,37 @@
         android:background="#000000"
         android:text="@string/contacts"
         android:minHeight="?attr/actionBarSize"
-        app:layout_constraintBottom_toTopOf="@+id/landscape_contact_details_fragment"
+        app:layout_constraintBottom_toTopOf="@+id/fragment_container"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toRightOf="@+id/contact_details_toolbar" />
+        app:layout_constraintLeft_toRightOf="@+id/contact_profile_toolbar" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/right_side_toolbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
-        android:text="@string/contact_details"
+        android:textColor="#ffffff"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="@+id/contact_list_toolbar"
         app:layout_constraintLeft_toLeftOf="@+id/contact_list_toolbar"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@+id/contact_list_toolbar" />
 
-    <fragment
-        android:id="@+id/landscape_contact_details_fragment"
-        android:name="com.example.nathanmorgenstern.contactlistapplication.ContactDetailsFragment"
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="358dp"
         android:layout_height="311dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/contact_details_toolbar"
+        android:layout_below="@+id/contact_profile_toolbar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@+id/landscape_contact_list_fragment"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/contact_list_toolbar"
-        tools:layout="@layout/fragment_contact_details" />
+        app:layout_constraintTop_toBottomOf="@+id/contact_list_toolbar" />
 
     <fragment
         android:id="@+id/landscape_contact_list_fragment"
@@ -84,11 +82,12 @@
         android:layout_height="311dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/contact_details_toolbar"
+        android:layout_below="@+id/contact_profile_toolbar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/landscape_contact_details_fragment"
-        app:layout_constraintTop_toBottomOf="@+id/contact_details_toolbar"
+        app:layout_constraintRight_toLeftOf="@+id/fragment_container"
+        app:layout_constraintTop_toBottomOf="@+id/contact_profile_toolbar"
         tools:layout="@layout/fragment_contact_list" />
+
 
 </android.support.constraint.ConstraintLayout>
