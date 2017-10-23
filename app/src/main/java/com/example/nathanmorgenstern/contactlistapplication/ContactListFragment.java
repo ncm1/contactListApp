@@ -8,14 +8,11 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
@@ -25,6 +22,7 @@ import java.util.ArrayList;
 
 import static android.R.attr.fragment;
 import static android.R.attr.orientation;
+import static android.R.id.list;
 
 
 /**
@@ -44,6 +42,7 @@ public class ContactListFragment extends Fragment {
     private MySQLHelper sqlHelper;
     private CheckBox chBox;
     private TextView text;
+    private String fromActivity;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -112,14 +111,27 @@ public class ContactListFragment extends Fragment {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 mListener.onFragmentInteraction(null);
-                Log.v(CONTACT_LIST, "Delete Button pressed");
+
                 getCheckedBoxes();
                 loadDataToListView();
 
-                ContactDetailsFragment cdf = (ContactDetailsFragment)getFragmentManager().findFragmentById(R.id.fragment_container);
+                //ContactDetailsFragment cdf = (ContactDetailsFragment);
+                Fragment f = getFragmentManager().findFragmentById(R.id.fragment_container);
+                Button addPersonButton = (Button)getActivity().findViewById(R.id.addPerson);
+
+                ContactDetailsFragment cf = null;
+                ContactProfileFragment cpf = null;
+                if(f != null && f instanceof ContactDetailsFragment)
+                    cf = (ContactDetailsFragment) f;
+                if(f != null && f instanceof ContactProfileFragment)
+                    cpf = (ContactProfileFragment) f;
+
                 if (getActivity().getResources().getConfiguration().orientation ==
-                        Configuration.ORIENTATION_LANDSCAPE && cdf != null)
-                        cdf.loadDataToListView();
+                        Configuration.ORIENTATION_LANDSCAPE && f != null && addPersonButton != null) {
+                    if(f != null && f instanceof ContactDetailsFragment)
+                        cf.loadDataToListView();
+                }
+                Log.v(CONTACT_LIST, "I'm here in delete button after if statement");
             }
         });
 
@@ -158,23 +170,54 @@ public class ContactListFragment extends Fragment {
             public void onClick(View view) {
                 mListener.onFragmentInteraction(null);
                 Log.v(CONTACT_LIST, "Add Button pressed");
-                ContactDetailsFragment f = new ContactDetailsFragment();
-
-                FragmentManager fragmentManager = getActivity().getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, f);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
-
-                TextView rightSide = (TextView)getActivity().findViewById(R.id.right_side_toolbar);
-                rightSide.setText("Contact Details");
+                contactDetailsFragment();
             }
         });
-
+        checkActivityCalled();
         Log.v(CONTACT_LIST, "I'm in landscape mode");
-
     }
     //Reference: https://developer.android.com/training/basics/fragments/fragment-ui.html
+
+    public void checkActivityCalled(){
+        Intent i = getActivity().getIntent();
+        fromActivity = i.getStringExtra("activityCalled");
+        String nameString = i.getStringExtra("nameStr");
+        Log.v(CONTACT_LIST,"Inside checkActivity Called");
+        Log.v(CONTACT_LIST, "Activity called: " + fromActivity);
+        if(fromActivity == null)
+            fromActivity = "";
+        if(fromActivity.equals("CONTACT_DETAILS")) {
+                contactDetailsFragment();
+        }
+        else if(fromActivity.equals("CONTACT_PROFILE")) {
+                Log.v(CONTACT_LIST, "Calling contactProfileFragment " + fromActivity);
+                contactProfileFragment(nameString);
+        }
+    }
+
+    public void contactProfileFragment(String nameStr){
+
+        ContactProfileFragment f = new ContactProfileFragment();
+
+        if(nameStr == null)
+           f = ContactProfileFragment.newInstance(nameStr, "fromInstance");
+
+        FragmentManager fragmentManager = getActivity().getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, f);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+
+    public void contactDetailsFragment(){
+        ContactDetailsFragment f = new ContactDetailsFragment();
+
+        FragmentManager fragmentManager = getActivity().getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, f);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
 
     public void getCheckedBoxes(){
         View v;
@@ -238,8 +281,9 @@ public class ContactListFragment extends Fragment {
         //Else,
         else if(this.getResources().getConfiguration().orientation ==
                 Configuration.ORIENTATION_LANDSCAPE) {
-            ContactProfileFragment cpf = new ContactProfileFragment();
+            ContactProfileFragment cpf = ContactProfileFragment.newInstance(name, "fromInstance");
 
+            //cpf.newInstance(name);
             FragmentManager fragmentManager = getActivity().getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, cpf);
@@ -247,9 +291,9 @@ public class ContactListFragment extends Fragment {
             fragmentTransaction.commit();
 
 
-            ContactProfileFragment contactProfile = (ContactProfileFragment)getFragmentManager().findFragmentById(R.id.fragment_container);
+            /*ContactProfileFragment contactProfile = (ContactProfileFragment)getFragmentManager().findFragmentById(R.id.fragment_container);
             if(contactProfile != null)
-                contactProfile.addContactDetails(name);
+                contactProfile.addContactDetails(name);*/
         }
     }
 

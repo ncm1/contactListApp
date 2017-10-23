@@ -1,6 +1,7 @@
 package com.example.nathanmorgenstern.contactlistapplication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -93,9 +94,21 @@ public class ContactDetailsFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
 
-        addPersonButton = (Button)getActivity().findViewById(R.id.addPerson);
+        ContactListFragment clf = (ContactListFragment)getFragmentManager().findFragmentById(R.id.contact_list_fragment);
+        Button addButtonContactList = (Button)getActivity().findViewById(R.id.add_button);
+        if (this.getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_LANDSCAPE && clf == null && addButtonContactList == null) {
+            Intent i = new Intent(getActivity(), MainActivity.class);
+            i.putExtra("activityCalled",CONTACT_DETAILS);
+            startActivity(i);
+        }
+
+        TextView rightSide = (TextView) getActivity().findViewById(R.id.right_side_toolbar);
+        if(rightSide != null)
+            rightSide.setText("Contact Details");
+        addPersonButton = (Button) getActivity().findViewById(R.id.addPerson);
         //check to see if the fragment is currently on the screen by checking if item is null
-        if(addPersonButton != null) {
+        if (addPersonButton != null) {
             sqlHelper = new MySQLHelper(getContext());
             loadDataToListView();
             addPersonActionListener();
@@ -146,27 +159,29 @@ public class ContactDetailsFragment extends Fragment {
 
     public void loadDataToListView() {
         final ListView contactList = (ListView) getActivity().findViewById(R.id.relationshipListView);
-        ArrayList<String> itemList;
-        itemList = sqlHelper.getAllContacts();
 
-        CustomAdapter custom_adapter = new CustomAdapter(getContext(), R.layout.my_custom_view, itemList);
-        contactList.setAdapter(custom_adapter);
+        if(contactList!= null) {
+            ArrayList<String> itemList;
+            itemList = sqlHelper.getAllContacts();
 
-        contactList.setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> list,
-                                            View row,
-                                            int index,
-                                            long rowID) {
-                        // code to run when user clicks that item
-                        TextView name = (TextView)row.findViewById(R.id.list_row_text);
+            CustomAdapter custom_adapter = new CustomAdapter(getContext(), R.layout.my_custom_view, itemList);
+            contactList.setAdapter(custom_adapter);
 
-                        Log.v(CONTACT_DETAILS, "int index: " + index);
-                        Log.v(CONTACT_DETAILS, "name: " + name.getText());
-                    }
-                });
+            contactList.setOnItemClickListener(
+                    new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> list,
+                                                View row,
+                                                int index,
+                                                long rowID) {
+                            // code to run when user clicks that item
+                            TextView name = (TextView) row.findViewById(R.id.list_row_text);
 
+                            Log.v(CONTACT_DETAILS, "int index: " + index);
+                            Log.v(CONTACT_DETAILS, "name: " + name.getText());
+                        }
+                    });
+        }
     }
 
     @Override

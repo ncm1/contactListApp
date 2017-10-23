@@ -1,7 +1,11 @@
 package com.example.nathanmorgenstern.contactlistapplication;
 
+import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -9,6 +13,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import static android.R.attr.name;
@@ -30,22 +36,19 @@ public class ContactProfileFragment extends Fragment {
     private static final String CONTACT_PROFILE = "CONTACT_PROFILE";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     private String nameStr;
+    private String instanceStr;
 
     private OnFragmentInteractionListener mListener;
 
     public ContactProfileFragment() {
         // Required empty public constructor
     }
-
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
      * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment ContactProfileFragment.
      */
     // TODO: Rename and change types and number of parameters
@@ -55,6 +58,7 @@ public class ContactProfileFragment extends Fragment {
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
+        Log.v(CONTACT_PROFILE, "mParam1: " + param1);
         return fragment;
     }
 
@@ -62,8 +66,13 @@ public class ContactProfileFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            nameStr = getArguments().getString(ARG_PARAM1);
+            instanceStr = getArguments().getString(ARG_PARAM2);
+            Log.v(CONTACT_PROFILE, "onCreate nameStr: " + nameStr);
+        }
+        else {
+            nameStr = "";
+            instanceStr = "";
         }
     }
 
@@ -71,8 +80,12 @@ public class ContactProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        Intent i = getActivity().getIntent();
-        nameStr = i.getStringExtra("nameStr");
+
+        if(!instanceStr.equals("fromInstance")) {
+            Intent i = getActivity().getIntent();
+            nameStr = i.getStringExtra("nameStr");
+        }
+
 
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_contact_profile, container, false);
@@ -82,42 +95,61 @@ public class ContactProfileFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
 
+        ContactListFragment clf = (ContactListFragment)getFragmentManager().findFragmentById(R.id.contact_list_fragment);
+        Button addButtonContactList = (Button)getActivity().findViewById(R.id.add_button);
+        if (this.getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_LANDSCAPE && clf == null && addButtonContactList == null) {
+            Intent i = new Intent(getActivity(), MainActivity.class);
+            i.putExtra("activityCalled",CONTACT_PROFILE);
+            i.putExtra("nameStr", nameStr);
+            startActivity(i);
+        }
+
         TextView rightSide = (TextView)getActivity().findViewById(R.id.right_side_toolbar);
 
         if(rightSide != null)
             rightSide.setText("Contact Profile");
         if(nameStr != null)
-            portraitMode();
+            setDisplay();
+        else if(rightSide != null){
+            try {
+                nameStr = getArguments().getString(ARG_PARAM1);
+                setDisplay();
+            }catch (Exception e){};
+        }
+
     }
 
-    public void portraitMode(){
+    public void setDisplay(){
         TextView displayName = (TextView)getActivity().findViewById(R.id.contact_profile_name);
 
         Log.v(CONTACT_PROFILE, "On Create Display name: " + nameStr);
-        displayName.setText(nameStr);
-        MySQLHelper sqlHelper = new MySQLHelper(getContext());
+        if(!nameStr.equals("") && nameStr != null && displayName != null) {
+            displayName.setText(nameStr);
+            MySQLHelper sqlHelper = new MySQLHelper(getContext());
 
-        String phoneNmbr;
-        phoneNmbr = sqlHelper.getContactPhone(nameStr);
-        Log.v(CONTACT_PROFILE, "Display phone: " + phoneNmbr);
-        TextView displayPhone = (TextView)getActivity().findViewById(R.id.contact_profile_phone_number);
-        displayPhone.setText(phoneNmbr);
+            String phoneNmbr = "";
+            try {
+                phoneNmbr = sqlHelper.getContactPhone(nameStr);
+            }catch(Exception e){blankify();};
+
+            Log.v(CONTACT_PROFILE, "Display phone: " + phoneNmbr);
+            TextView displayPhone = (TextView) getActivity().findViewById(R.id.contact_profile_phone_number);
+            displayPhone.setText(phoneNmbr);
+        }
     }
 
-    public void addContactDetails(String name){
-        nameStr = name;
-        TextView displayName = (TextView)getActivity().findViewById(R.id.contact_profile_name);
-        Log.v(CONTACT_PROFILE, "Add Contact Details Display name: " + nameStr);
-        displayName.setText(nameStr);
+    public void blankify(){
+        FragmentManager fragmentManager = getActivity().getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.remove(getActivity().getFragmentManager().findFragmentById(R.id.fragment_container));
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
 
-        MySQLHelper sqlHelper = new MySQLHelper(getContext());
-
-        String phoneNmbr;
-        phoneNmbr = sqlHelper.getContactPhone(nameStr);
-        TextView displayPhone = (TextView)getActivity().findViewById(R.id.contact_profile_phone_number);
-        displayPhone.setText(phoneNmbr);
+        TextView rightSide = (TextView)getActivity().findViewById(R.id.right_side_toolbar);
+        if(rightSide != null)
+            rightSide.setText("");
     }
-
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
