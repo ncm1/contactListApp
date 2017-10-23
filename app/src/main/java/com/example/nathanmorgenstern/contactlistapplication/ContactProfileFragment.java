@@ -148,7 +148,8 @@ public class ContactProfileFragment extends Fragment {
             ArrayList<String> arr = new ArrayList<String>();
             String data = "";
 
-                data = sqlHelper.getRelationship(nameStr);
+            data = sqlHelper.getRelationship(nameStr);
+            if(!data.equals("")) {
                 String[] arrDelimiter = data.split(",");
 
                 List<String> ls = Arrays.asList(arrDelimiter);
@@ -157,7 +158,7 @@ public class ContactProfileFragment extends Fragment {
                     tempStr = sqlHelper.getContactName(ls.get(i));
                     arr.add(tempStr);
                 }
-
+            }
             ArrayAdapter<String> ad = new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_1, arr);
             lv.setAdapter(ad);
         }

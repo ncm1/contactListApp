@@ -238,7 +238,8 @@ public class ContactListFragment extends Fragment {
                 Log.v(CONTACT_LIST, "Check box at index: " + i + " checked!");
                 tempRel = sqlHelper.getRelationship(text.getText().toString());
                 tempID  = sqlHelper.getContactPrimaryKey(text.getText().toString());
-                clearRemaingRelationships(tempRel, String.valueOf(tempID));
+                if(!tempRel.equals(""))
+                    clearRemaingRelationships(tempRel, String.valueOf(tempID));
                 sqlHelper.deleteContact(text.getText().toString());
             }
             else
@@ -257,13 +258,18 @@ public class ContactListFragment extends Fragment {
         for(int i = 0; i < list.size(); i++){
             temp = list.get(i);
             contact = sqlHelper.getRelationship(Integer.parseInt(temp));
+            Log.v(CONTACT_LIST,"clearRemainingRelation: contact: "+contact);
             updatedRelationship = "";
+
             String[] anotherString = contact.split(",");
             List<String> anotherList = Arrays.asList(anotherString);
             for(int j = 0; j < anotherList.size(); j++){
-                if(!anotherList.get(j).equals(id))
-                    updatedRelationship += anotherList.get(i) + ",";
+                Log.v(CONTACT_LIST,"id to be deleted is "+id);
+                Log.v(CONTACT_LIST,"id in anotherList is "+anotherList.get(j));
+                if(!(anotherList.get(j).equals(id)))
+                    updatedRelationship += anotherList.get(j) + ",";
             }
+            Log.v(CONTACT_LIST,"updatedRelationship is "+updatedRelationship);
             sqlHelper.updateRelationship(Integer.parseInt(temp),updatedRelationship);
         }
     }

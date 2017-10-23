@@ -34,7 +34,7 @@ public class MySQLHelper extends SQLiteOpenHelper {
     // Database Version
     private static final int DATABASE_VERSION = 1;
     // Database Name
-    private static final String DATABASE_NAME = "ContactzDB";
+    private static final String DATABASE_NAME = "ContactssDB";
 
     public MySQLHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
