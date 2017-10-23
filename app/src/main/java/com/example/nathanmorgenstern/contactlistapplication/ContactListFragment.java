@@ -19,6 +19,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static android.R.attr.fragment;
 import static android.R.attr.orientation;
@@ -223,6 +225,9 @@ public class ContactListFragment extends Fragment {
         View v;
         ListView contactList = (ListView) getActivity().findViewById(R.id.contact_list_view);
         Log.v(CONTACT_LIST, "Contact list.getCount(): " + contactList.getCount());
+
+        String tempRel = "";
+        int tempID = 0;
         for (int i = 0; i < contactList.getCount(); i++) {
             v = contactList.getAdapter().getView(i, null, null);
             //Getting the views by their index...
@@ -231,12 +236,36 @@ public class ContactListFragment extends Fragment {
 
             if (chBox.isChecked()) {
                 Log.v(CONTACT_LIST, "Check box at index: " + i + " checked!");
+                tempRel = sqlHelper.getRelationship(text.getText().toString());
+                tempID  = sqlHelper.getContactPrimaryKey(text.getText().toString());
+                clearRemaingRelationships(tempRel, String.valueOf(tempID));
                 sqlHelper.deleteContact(text.getText().toString());
             }
             else
                 Log.v(CONTACT_LIST, "Check box at index: " + i + " is not checked!");
         }
 
+    }
+
+    public void clearRemaingRelationships(String rel, String id){
+        String[] squareArray = rel.split(",");
+        List<String> list = Arrays.asList(squareArray);
+
+        String temp;
+        String contact;
+        String updatedRelationship;
+        for(int i = 0; i < list.size(); i++){
+            temp = list.get(i);
+            contact = sqlHelper.getRelationship(Integer.parseInt(temp));
+            updatedRelationship = "";
+            String[] anotherString = contact.split(",");
+            List<String> anotherList = Arrays.asList(anotherString);
+            for(int j = 0; j < anotherList.size(); j++){
+                if(!anotherList.get(j).equals(id))
+                    updatedRelationship += anotherList.get(i) + ",";
+            }
+            sqlHelper.updateRelationship(Integer.parseInt(temp),updatedRelationship);
+        }
     }
 
     public void loadDataToListView(){

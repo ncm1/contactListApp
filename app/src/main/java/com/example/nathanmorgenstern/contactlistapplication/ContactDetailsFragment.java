@@ -17,7 +17,12 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
+
+import static android.R.attr.id;
+import static android.R.attr.name;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -36,6 +41,7 @@ public class ContactDetailsFragment extends Fragment {
     private MySQLHelper sqlHelper;
     private Button  addPersonButton;
     private CheckBox chBox;
+    private ArrayList<Integer> idArr;
     EditText name_input;
     EditText phone_input;
 
@@ -128,12 +134,14 @@ public class ContactDetailsFragment extends Fragment {
 
                 Log.v(CONTACT_DETAILS, "nameStr " + nameStr);
                 Log.v(CONTACT_DETAILS, "phoneStr " + phoneStr);
-                int id = sqlHelper.getContactsCount() + 1;
 
+                String relationship = getCheckedBoxes();
+                Log.v(CONTACT_DETAILS, "relationship: " + relationship);
                 //Create the new contact and add them to the database using sqlHelper class
                 if (!nameStr.equals("") && !phoneStr.equals("")) {
-                    Contact newContact = new Contact(id, nameStr, phoneStr);
+                    Contact newContact = new Contact(nameStr, phoneStr,relationship);
                     sqlHelper.addContact(newContact);
+                    updateRelationships(nameStr);
                     Log.v(CONTACT_DETAILS, "added contact with sqlHelper");
                     orientationAction();
                 }//check that the inputs are not empty
@@ -181,6 +189,48 @@ public class ContactDetailsFragment extends Fragment {
                             Log.v(CONTACT_DETAILS, "name: " + name.getText());
                         }
                     });
+        }
+    }
+
+    public String getCheckedBoxes(){
+        View v;
+        ListView contactList = (ListView) getActivity().findViewById(R.id.relationshipListView);
+        Log.v(CONTACT_DETAILS, "getCheckedBoxes()");
+
+        String r = "";
+        String tempName = "";
+        int tempID = 0;
+        idArr = new ArrayList<Integer>();
+        for (int i = 0; i < contactList.getCount(); i++) {
+            v = contactList.getAdapter().getView(i, null, null);
+            //Getting the views by their index...
+            chBox = v.findViewById(R.id.list_row_box);
+            TextView text  = v.findViewById(R.id.list_row_text);
+
+            tempName = text.getText().toString();
+            if (chBox.isChecked()) {
+                Log.v(CONTACT_DETAILS, "Check box at index: " + i + " checked!");
+                tempID = sqlHelper.getContactPrimaryKey(tempName);
+                r += tempID + ",";
+                idArr.add(tempID);
+            }
+            else
+                Log.v(CONTACT_DETAILS, "Check box at index: " + i + " is not checked!");
+        }
+        return r;
+    }
+
+    public void updateRelationships(String name){
+        if(idArr != null) {
+            int contactID = sqlHelper.getContactPrimaryKey(name);
+            String queryRel = "";
+            Log.v(CONTACT_DETAILS, "New contact added: " + name);
+            for(int i = 0; i < idArr.size(); i++) {
+                queryRel = sqlHelper.getRelationship(idArr.get(i));
+                Log.v(CONTACT_DETAILS, "Relationship Before: " + queryRel);
+                queryRel += contactID + ",";
+                sqlHelper.updateRelationship(idArr.get(i),queryRel);
+            }
         }
     }
 

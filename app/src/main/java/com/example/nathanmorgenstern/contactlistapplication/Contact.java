@@ -11,20 +11,26 @@ public class Contact {
 
     private String name;
     private String number;
+    private String relationship;
     private int _id;
 
     public Contact(){}
 
-    public Contact(int _id, String name, String number){
-        this._id = _id;
+    public Contact(String name, String number, String relationship){
         this.name = name;
         this.number = number;
+        this.relationship = relationship;
     }
 
     public String getName(){
         return name;
     }
 
+    public String getRelationship(){return relationship;}
+
+    public void setRelationship(String r){
+        this.relationship = r;
+    }
     public void setName(String name){this.name = name;}
 
     public String getNumber(){

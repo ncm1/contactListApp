@@ -13,10 +13,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static android.R.attr.data;
 import static android.R.attr.name;
 
 
@@ -136,6 +142,24 @@ public class ContactProfileFragment extends Fragment {
             Log.v(CONTACT_PROFILE, "Display phone: " + phoneNmbr);
             TextView displayPhone = (TextView) getActivity().findViewById(R.id.contact_profile_phone_number);
             displayPhone.setText(phoneNmbr);
+
+            ListView lv = (ListView)getActivity().findViewById(R.id.contact_profile_relationship_list);
+
+            ArrayList<String> arr = new ArrayList<String>();
+            String data = "";
+
+                data = sqlHelper.getRelationship(nameStr);
+                String[] arrDelimiter = data.split(",");
+
+                List<String> ls = Arrays.asList(arrDelimiter);
+                String tempStr = "";
+                for (int i = 0; i < ls.size(); i++) {
+                    tempStr = sqlHelper.getContactName(ls.get(i));
+                    arr.add(tempStr);
+                }
+
+            ArrayAdapter<String> ad = new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_1, arr);
+            lv.setAdapter(ad);
         }
     }
 
